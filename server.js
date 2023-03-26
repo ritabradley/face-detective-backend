@@ -1,5 +1,7 @@
 import express from "express";
-import cors from 'cors'
+import cors from "cors";
+import jwt from "jsonwebtoken";
+
 
 const app = express();
 const PORT = 3000;
@@ -67,6 +69,29 @@ app.post('/check-email', (req, res) => {
     res.json({ message: 'Email is available' });
   }
 });
+
+
+// /forgotpassword --> POST == success/fail
+// /forgotpassword --> POST == success/fail
+app.post('/forgotpassword', (req, res) => {
+  const { email } = req.body;
+  const foundUser = database.users.find(user => email === user.email);
+
+  if (foundUser) {
+    // Generate a unique token with an expiration time
+	  // Store the token and expiration time with the user's email
+    // (In a production app, this would be saved to a real database)
+    foundUser.resetPasswordToken = jwt.sign({email}, process.env.JWT_SECRET, {expiresIn: '1h'});
+    foundUser.resetPasswordExpires = Date.now() + 3600000; // 1 hour from now
+
+    // TODO: Send a password reset email with the token
+    res.json({ message: 'Password reset email sent' });
+  } else {
+    res.status(404).json({ message: 'User not found' });
+  }
+});
+
+
 // /profile/:userId --> GET res == user
 app.get('/profile/:userId', (req, res) => {
 	const {userId} = req.params
