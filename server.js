@@ -27,7 +27,7 @@ const database = {
 }
 
 app.get('/', (req, res) => {
-	res.send('wooo! we in here!')
+	res.send(database.users)
 })
 
 // /signin --> POST == success/fail
@@ -57,8 +57,13 @@ app.post('/register', (req, res, ) => {
 
 // /profile/:userId --> GET res == user
 app.get('/profile/:userId', (req, res) => {
-	res.send('user profile')
-	console.log(req.params)
+	const {userId} = req.params
+	const foundId = database.users.find(user => userId === user.userId)
+	if (foundId) {
+		res.json(foundId)
+	} else {
+		res.status(404).json('user not found')
+	}
 })
 
 app.put('/image', (req, res) => {
