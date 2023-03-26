@@ -130,6 +130,37 @@ app.post("/forgotpassword", async (req, res) => {
   }
 });
 
+// /resetpassword/:token --> GET == success/fail
+app.get('/resetpassword/:token', (req, res) => {
+  const { token } = req.params;
+  const foundUser = database.users.find(user => user.resetPasswordToken === token && user.resetPasswordExpires > Date.now());
+
+  if (foundUser) {
+    // Send a response indicating that the token is valid
+    res.json({ message: 'Token is valid', email: foundUser.email });
+  } else {
+    res.status(400).json({ message: 'Invalid or expired token' });
+  }
+});
+
+
+// /resetpassword --> POST == success/fail
+app.post('/resetpassword', (req, res) => {
+  const { email, newPassword, token } = req.body;
+  const foundUser = database.users.find(user => user.email === email && user.resetPasswordToken === token && user.resetPasswordExpires > Date.now());
+
+  if (foundUser) {
+    // Update the user's password and clear the reset password token and expiration
+    foundUser.password = newPassword;
+    foundUser.resetPasswordToken = null;
+    foundUser.resetPasswordExpires = null;
+
+    // Send a response indicating that the password was successfully reset
+    res.json({ message: 'Password successfully reset' });
+  } else {
+    res.status(400).json({ message: 'Invalid or expired token' });
+  }
+});
 
 // /profile/:userId --> GET res == user
 app.get("/profile/:userId", (req, res) => {
