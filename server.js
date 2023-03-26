@@ -67,7 +67,14 @@ app.get('/profile/:userId', (req, res) => {
 })
 
 app.put('/image', (req, res) => {
-	res.send('image entries')
+	const {userId} = req.body
+	const foundId = database.users.find(user => userId === user.userId)
+	if (foundId) {
+		foundId.entries++
+		res.json(foundId.entries)
+	} else {
+		res.status(404).json('user not found')
+	}
 })
 
 app.listen(PORT, () => console.log(`Server is running on ${PORT}`));
