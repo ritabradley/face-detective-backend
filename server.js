@@ -57,6 +57,16 @@ app.post('/register', (req, res, ) => {
 	res.json(database.users[database.users.length - 1])
 })
 
+app.post('/check-email', (req, res) => {
+  const { email } = req.body;
+  const emailExists = database.users.some(user => email === user.email);
+
+  if (emailExists) {
+    res.status(400).json({ message: 'Email already exists' });
+  } else {
+    res.json({ message: 'Email is available' });
+  }
+});
 // /profile/:userId --> GET res == user
 app.get('/profile/:userId', (req, res) => {
 	const {userId} = req.params
