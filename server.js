@@ -1,10 +1,10 @@
 import express from "express";
 import cors from "cors";
-import bcrypt from 'bcrypt'
+import bcrypt from "bcrypt";
 import {v4 as uuidv4} from "uuid";
-import dotenv from 'dotenv'
+import dotenv from "dotenv";
 
-dotenv.config()
+dotenv.config();
 
 const app = express();
 const PORT = 3000;
@@ -14,32 +14,31 @@ app.use(cors());
 
 const saltRounds = 10;
 const hashPassword = async (password) => {
-  return await bcrypt.hash(password, saltRounds);
+	return await bcrypt.hash(password, saltRounds);
 };
 
 const users = [
-  {
-    userId: "239t2f",
-    name: "Rita",
-    email: "rita@ritabradley.dev",
-    password: await hashPassword("8np05J^&fUf-"),
-    entries: 5,
-    joined: new Date(),
-  },
-  {
-    userId: "392fn1",
-    name: "Ron",
-    email: "ronaldhopkins904@gmail.com",
-    password: await hashPassword("9KnR&cT93*L"),
-    entries: 0,
-    joined: new Date(),
-  },
+	{
+		userId: uuidv4(),
+		name: "Rita",
+		email: "rita@ritabradley.dev",
+		password: await hashPassword("8np05J^&fUf-"),
+		entries: 5,
+		joined: new Date(),
+	},
+	{
+		userId: uuidv4(),
+		name: "Ron",
+		email: "ronaldhopkins904@gmail.com",
+		password: await hashPassword("9KnR&cT93*L"),
+		entries: 0,
+		joined: new Date(),
+	},
 ];
 
 const database = {
-  users,
+	users,
 };
-
 
 
 // const database = {
@@ -69,20 +68,20 @@ app.get("/", (req, res) => {
 });
 
 // /signin --> POST == success/fail
-app.post('/signin', async (req, res) => {
-  const { email, password } = req.body;
-  const foundUser = database.users.find(user => email === user.email);
+app.post("/signin", async (req, res) => {
+	const {email, password} = req.body;
+	const foundUser = database.users.find(user => email === user.email);
 
-  if (foundUser) {
-    const isPasswordMatch = await bcrypt.compare(password, foundUser.password);
-    if (isPasswordMatch) {
-      res.json(foundUser);
-    } else {
-      res.status(404).json('Incorrect password');
-    }
-  } else {
-    res.status(404).json('User not found');
-  }
+	if (foundUser) {
+		const isPasswordMatch = await bcrypt.compare(password, foundUser.password);
+		if (isPasswordMatch) {
+			res.json(foundUser);
+		} else {
+			res.status(404).json("Incorrect password");
+		}
+	} else {
+		res.status(404).json("User not found");
+	}
 });
 
 
@@ -92,7 +91,7 @@ app.post("/register", async (req, res,) => {
 	const userId = uuidv4();
 
 	const saltRounds = 10;
-    const hashedPassword = await bcrypt.hash(password, saltRounds);
+	const hashedPassword = await bcrypt.hash(password, saltRounds);
 
 	database.users.push({
 		userId,
