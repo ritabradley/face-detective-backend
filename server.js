@@ -1,17 +1,18 @@
 import express from "express";
 import cors from "cors";
-import jwt from "jsonwebtoken";
 import bcrypt from 'bcrypt'
 import {v4 as uuidv4} from "uuid";
-import nodemailer from "nodemailer";
+import dotenv from 'dotenv'
 
-
+dotenv.config()
 
 const app = express();
 const PORT = 3000;
 
 app.use(express.json());
 app.use(cors());
+
+
 
 const database = {
 	users: [
@@ -33,14 +34,6 @@ const database = {
 		}
 	]
 };
-
-const transporter = nodemailer.createTransport({
-  service: "gmail",
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASSWORD,
-  },
-});
 
 
 app.get("/", (req, res) => {
@@ -93,73 +86,6 @@ app.post("/check-email", (req, res) => {
 	} else {
 		res.json({message: "Email is available"});
 	}
-});
-
-// /forgotpassword --> POST == success/fail
-app.post("/forgotpassword", async (req, res) => {
-	const {email} = req.body;
-	const foundUser = database.users.find(user => email === user.email);
-
-	if (foundUser) {
-		// Generate a unique token with an expiration time
-		// Store the token and expiration time with the user's email
-		// (In a production app, this would be saved to a real database)
-		foundUser.resetPasswordToken = jwt.sign({email}, process.env.JWT_SECRET, {expiresIn: "1h"});
-		foundUser.resetPasswordExpires = Date.now() + 3600000; // 1 hour from now
-
-		// Send a password reset email with the token
-    const mailOptions = {
-      to: email,
-      from: process.env.EMAIL_USER,
-      subject: 'Password Reset',
-      text: `You are receiving this because you (or someone else) have requested the reset of the password for your account.\n\n
-             Please click on the following link, or paste this into your browser to complete the process:\n\n
-             http://${req.headers.host}/resetpassword/${token}\n\n
-             If you did not request this, please ignore this email and your password will remain unchanged.\n`,
-    };
-
-    try {
-      await transporter.sendMail(mailOptions);
-      res.json({ message: 'Password reset email sent' });
-    } catch (error) {
-      console.error('Error sending password reset email:', error);
-      res.status(500).json({ message: 'Error sending password reset email' });
-    }
-  } else {
-    res.status(404).json({ message: 'User not found' });
-  }
-});
-
-// /resetpassword/:token --> GET == success/fail
-app.get('/resetpassword/:token', (req, res) => {
-  const { token } = req.params;
-  const foundUser = database.users.find(user => user.resetPasswordToken === token && user.resetPasswordExpires > Date.now());
-
-  if (foundUser) {
-    // Send a response indicating that the token is valid
-    res.json({ message: 'Token is valid', email: foundUser.email });
-  } else {
-    res.status(400).json({ message: 'Invalid or expired token' });
-  }
-});
-
-
-// /resetpassword --> POST == success/fail
-app.post('/resetpassword', (req, res) => {
-  const { email, newPassword, token } = req.body;
-  const foundUser = database.users.find(user => user.email === email && user.resetPasswordToken === token && user.resetPasswordExpires > Date.now());
-
-  if (foundUser) {
-    // Update the user's password and clear the reset password token and expiration
-    foundUser.password = newPassword;
-    foundUser.resetPasswordToken = null;
-    foundUser.resetPasswordExpires = null;
-
-    // Send a response indicating that the password was successfully reset
-    res.json({ message: 'Password successfully reset' });
-  } else {
-    res.status(400).json({ message: 'Invalid or expired token' });
-  }
 });
 
 // /profile/:userId --> GET res == user
