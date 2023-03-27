@@ -12,28 +12,56 @@ const PORT = 3000;
 app.use(express.json());
 app.use(cors());
 
+const saltRounds = 10;
+const hashPassword = async (password) => {
+  return await bcrypt.hash(password, saltRounds);
+};
 
+const users = [
+  {
+    userId: "239t2f",
+    name: "Rita",
+    email: "rita@ritabradley.dev",
+    password: await hashPassword("8np05J^&fUf-"),
+    entries: 5,
+    joined: new Date(),
+  },
+  {
+    userId: "392fn1",
+    name: "Ron",
+    email: "ronaldhopkins904@gmail.com",
+    password: await hashPassword("9KnR&cT93*L"),
+    entries: 0,
+    joined: new Date(),
+  },
+];
 
 const database = {
-	users: [
-		{
-			userId: "239t2f",
-			name: "Rita",
-			email: "rita@ritabradley.dev",
-			password: "8np05J^&fUf-",
-			entries: 5,
-			joined: new Date()
-		},
-		{
-			userId: "392fn1",
-			name: "Ron",
-			email: "ronaldhopkins904@gmail.com",
-			password: "9KnR&cT93*L",
-			entries: 0,
-			joined: new Date()
-		}
-	]
+  users,
 };
+
+
+
+// const database = {
+// 	users: [
+// 		{
+// 			userId: "239t2f",
+// 			name: "Rita",
+// 			email: "rita@ritabradley.dev",
+// 			password: "8np05J^&fUf-",
+// 			entries: 5,
+// 			joined: new Date()
+// 		},
+// 		{
+// 			userId: "392fn1",
+// 			name: "Ron",
+// 			email: "ronaldhopkins904@gmail.com",
+// 			password: "9KnR&cT93*L",
+// 			entries: 0,
+// 			joined: new Date()
+// 		}
+// 	]
+// };
 
 
 app.get("/", (req, res) => {
@@ -48,7 +76,7 @@ app.post('/signin', async (req, res) => {
   if (foundUser) {
     const isPasswordMatch = await bcrypt.compare(password, foundUser.password);
     if (isPasswordMatch) {
-      res.json('success');
+      res.json(foundUser);
     } else {
       res.status(404).json('Incorrect password');
     }
