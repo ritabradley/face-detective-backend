@@ -109,15 +109,13 @@ app.put("/image", (req, res) => {
 	const {userId} = req.body;
 
 	database('users')
-		.select('entries')
 		.where('user_id', userId)
-		.then(user => {
-			if (user.length) {
-				user.entries++
-				res.json(user.entries)
-			}
+		.increment('entries', 1)
+		.returning('entries')
+		.then(entries => {
+			res.json(entries[0].entries)
 		}).catch(err => {
-			res.status(404).json("user not found");
+			res.status(400).json("unable to update entries");
 	})
 });
 
