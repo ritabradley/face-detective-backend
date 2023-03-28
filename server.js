@@ -4,7 +4,7 @@ import bcrypt from "bcrypt";
 import dotenv from "dotenv";
 import knex from 'knex'
 
-const db = knex({
+const database = knex({
   client: 'pg',
   connection: {
     host : '127.0.0.1',
@@ -14,8 +14,6 @@ const db = knex({
     database : 'face-detective'
   }
 });
-
-console.log(db.select('*').from('users'))
 
 dotenv.config();
 
@@ -30,28 +28,6 @@ const hashPassword = async (password) => {
 	return await bcrypt.hash(password, saltRounds);
 };
 
-const users = [
-	{
-		userId: '',
-		name: "Rita",
-		email: "rita@ritabradley.dev",
-		password: await hashPassword("8np05J^&fUf-"),
-		entries: 5,
-		joined: new Date(),
-	},
-	{
-		userId: '',
-		name: "Ron",
-		email: "ronaldhopkins904@gmail.com",
-		password: await hashPassword("9KnR&cT93*L"),
-		entries: 0,
-		joined: new Date(),
-	},
-];
-
-const database = {
-	users,
-};
 
 app.get("/", (req, res) => {
 	res.send(database.users);
@@ -83,48 +59,66 @@ app.post("/register", async (req, res,) => {
 	const saltRounds = 10;
 	const hashedPassword = await bcrypt.hash(password, saltRounds);
 
-	database.users.push({
-		userId,
-		name,
-		email,
-		password: hashedPassword,
-		entries: 0,
-		joined: new Date()
-	});
-	res.json(database.users[database.users.length - 1]);
+	database('users')
+		.returning('*')
+		.insert({
+			name,
+			email,
+			joined: new Date()
+	}).then(user => {
+		res.json(user[0])
+	}).catch(err => res.status(404).json('We cannot register you at this time. Please try again later.'))
 });
 
 app.post("/check-email", (req, res) => {
-	const {email} = req.body;
-	const emailExists = database.users.some(user => email === user.email);
-
-	if (emailExists) {
-		res.status(400).json({message: "Email already exists"});
-	} else {
-		res.json({message: "Email is available"});
-	}
+  const { email } = req.body;
+  database("users")
+    .select("email")
+    .where("email", email)
+    .then((result) => {
+      if (result.length > 0) {
+        res.status(400).json({ message: "Email already exists" });
+      } else {
+        res.json({ message: "Email is available" });
+      }
+    })
+    .catch((err) => {
+      res.status(500).json({ message: "Error checking email availability" });
+    });
 });
 
 // /profile/:userId --> GET res == user
 app.get("/profile/:userId", (req, res) => {
 	const {userId} = req.params;
-	const foundId = database.users.find(user => userId === user.userId);
-	if (foundId) {
-		res.json(foundId);
-	} else {
-		res.status(404).json("user not found");
-	}
+
+	database('users')
+		.select("*")
+		.where("user_id", userId)
+		.then(user => {
+			if (user.length) {
+				res.json(user[0])
+			} else {
+				throw new Error;
+			}
+		}).catch(err => {
+			res.status(404).json("user not found");
+	})
 });
 
 app.put("/image", (req, res) => {
 	const {userId} = req.body;
-	const foundId = database.users.find(user => userId === user.userId);
-	if (foundId) {
-		foundId.entries++;
-		res.json(foundId.entries);
-	} else {
-		res.status(404).json("user not found");
-	}
+
+	database('users')
+		.select('entries')
+		.where('user_id', userId)
+		.then(user => {
+			if (user.length) {
+				user.entries++
+				res.json(user.entries)
+			}
+		}).catch(err => {
+			res.status(404).json("user not found");
+	})
 });
 
 app.listen(PORT, () => console.log(`Server is running on ${PORT}`));
