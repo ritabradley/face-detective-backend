@@ -1,8 +1,21 @@
 import express from "express";
 import cors from "cors";
 import bcrypt from "bcrypt";
-import {v4 as uuidv4} from "uuid";
 import dotenv from "dotenv";
+import knex from 'knex'
+
+const db = knex({
+  client: 'pg',
+  connection: {
+    host : '127.0.0.1',
+    port : 5432,
+    user : 'rita',
+    password : process.env.DB_PASSWORD,
+    database : 'face-detective'
+  }
+});
+
+console.log(db.select('*').from('users'))
 
 dotenv.config();
 
@@ -19,7 +32,7 @@ const hashPassword = async (password) => {
 
 const users = [
 	{
-		userId: uuidv4(),
+		userId: '',
 		name: "Rita",
 		email: "rita@ritabradley.dev",
 		password: await hashPassword("8np05J^&fUf-"),
@@ -27,7 +40,7 @@ const users = [
 		joined: new Date(),
 	},
 	{
-		userId: uuidv4(),
+		userId: '',
 		name: "Ron",
 		email: "ronaldhopkins904@gmail.com",
 		password: await hashPassword("9KnR&cT93*L"),
@@ -39,29 +52,6 @@ const users = [
 const database = {
 	users,
 };
-
-
-// const database = {
-// 	users: [
-// 		{
-// 			userId: "239t2f",
-// 			name: "Rita",
-// 			email: "rita@ritabradley.dev",
-// 			password: "8np05J^&fUf-",
-// 			entries: 5,
-// 			joined: new Date()
-// 		},
-// 		{
-// 			userId: "392fn1",
-// 			name: "Ron",
-// 			email: "ronaldhopkins904@gmail.com",
-// 			password: "9KnR&cT93*L",
-// 			entries: 0,
-// 			joined: new Date()
-// 		}
-// 	]
-// };
-
 
 app.get("/", (req, res) => {
 	res.send(database.users);
@@ -88,7 +78,7 @@ app.post("/signin", async (req, res) => {
 // /register --> POST == user
 app.post("/register", async (req, res,) => {
 	const {name, email, password} = req.body;
-	const userId = uuidv4();
+	const userId = '';
 
 	const saltRounds = 10;
 	const hashedPassword = await bcrypt.hash(password, saltRounds);
