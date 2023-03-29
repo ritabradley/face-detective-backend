@@ -95,4 +95,4 @@ Feel free to modify the code to suit your needs. If you want to change the datab
 ## Submitting Issues and Pull Requests
 
 1. For issues, open a new issue on the [GitHub repository](https://github.com/ritabradley```/face-detective-backend/issues) and provide a detailed description of the problem.
-2. For pull requests, create a new branch, make your changes, and submit a pull request. Please provide a clear description of the changes you've made.
+2. For pull requests, create a new branch, make your changes, and submit a pull request. Please provide a clear description of the changes you've made. 
