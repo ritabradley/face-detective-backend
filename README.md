@@ -78,7 +78,7 @@ DB_USER=face_detective_user
 DB_PASSWORD=your_database_password
 ```
 
-Replace \`your_database_url\` and \`your_database_password\` with the appropriate values for your PostgreSQL setup.
+Replace `your_database_url` and `your_database_password` with the appropriate values for your PostgreSQL setup.
 
 ## Running the Server
 
@@ -90,7 +90,7 @@ npm start
 
 ## Modifying the Code
 
-Feel free to modify the code to suit your needs. If you want to change the database connection details, you can update the \`knex\` configuration in \`server.js\`.
+Feel free to modify the code to suit your needs. If you want to change the database connection details, you can update the `knex` configuration in `server.js`.
 
 ## Submitting Issues and Pull Requests
 
