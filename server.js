@@ -31,29 +31,32 @@ app.get("/", (req, res) => {
 // /signin --> POST == success/fail
 app.post("/signin", async (req, res) => {
 	const {email, password} = req.body;
-	const foundUser = database.users.find(user => email === user.email);
 
-	database("logins")
+	database
+		.select("email", "hash")
+		.from("logins")
 		.where("email", email)
-		.insert();
-
-	if (foundUser) {
-		const isPasswordMatch = await bcrypt.compare(password, foundUser.password);
-		if (isPasswordMatch) {
-			res.json(foundUser);
-		} else {
-			res.status(404).json("Incorrect password");
-		}
-	} else {
-		res.status(404).json("User not found");
-	}
+		.then(async (response) => {
+			const isMatchedPassword = await bcrypt.compare(password, response[0].hash)
+			if (isMatchedPassword) {
+				database.select('*')
+					.from('users')
+					.where('email', email)
+					.then(user => res.json(user[0]))
+					.catch(err => res.status(400).json('unable to retrieve user'))
+			} else {
+				res.status(400).json('Invalid email or password. Please try again.')
+			}
+		})
+		.catch((err) => {
+			res.status(404).json("User not found");
+		});
 });
 
 
 // /register --> POST == user
 app.post("/register", async (req, res,) => {
 	const {name, email, password} = req.body;
-	const userId = "";
 
 	const saltRounds = 10;
 	const hashedPassword = await bcrypt.hash(password, saltRounds);
@@ -66,7 +69,7 @@ app.post("/register", async (req, res,) => {
 			})
 			.returning("email")
 			.then(loginEmail => {
-				database("users")
+				trx("users")
 					.returning("*")
 					.insert({
 						name,
@@ -75,7 +78,9 @@ app.post("/register", async (req, res,) => {
 					}).then(user => {
 					res.json(user[0]);
 				});
-			});
+			})
+			.then(trx.commit)
+			.catch(trx.rollback);
 	})
 		.catch(err => res.status(404).json("We cannot register you at this time. Please try again later."));
 });
