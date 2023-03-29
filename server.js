@@ -120,9 +120,27 @@ app.post("/check-email", (req, res) => {
 			}
 		})
 		.catch((err) => {
+			console.error("Error in /check-email route:", err); // Add this line for more detailed logging
 			res.status(500).json({message: "Error checking email availability"});
 		});
 });
+
+// app.post("/check-email", (req, res) => {
+// 	const {email} = req.body;
+// 	database("users")
+// 		.select("email")
+// 		.where("email", email)
+// 		.then((result) => {
+// 			if (result.length > 0) {
+// 				res.status(400).json({message: "Email already exists"});
+// 			} else {
+// 				res.json({message: "Email is available"});
+// 			}
+// 		})
+// 		.catch((err) => {
+// 			res.status(500).json({message: "Error checking email availability"});
+// 		});
+// });
 
 // /profile/:userId --> GET res == user
 app.get("/profile/:userId", (req, res) => {
