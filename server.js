@@ -7,11 +7,15 @@ import knex from "knex";
 const database = knex({
 	client: "pg",
 	connection: {
-		host: "127.0.0.1",
+		connectionString: process.env.DB_URL,
+		host: process.env.DB_HOST,
 		port: 5432,
-		user: "rita",
+		ssl: {
+			rejectUnauthorized: true
+		},
+		user: process.env.DB_USER,
 		password: process.env.DB_PASSWORD,
-		database: "face-detective"
+		database: process.env.DB_USER
 	}
 });
 
