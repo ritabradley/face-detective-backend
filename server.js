@@ -44,7 +44,7 @@ app.post("/signin", async (req, res) => {
 					.where("email", email)
 					.then(user => {
 						const modifiedUser = {
-							userId: user[0].user_id, // Assuming 'id' is the unique identifier in the database
+							userId: user[0].user_id,
 							name: user[0].name,
 							email: user[0].email,
 							entries: user[0].entries,
@@ -87,7 +87,7 @@ app.post("/register", async (req, res,) => {
 						joined: new Date()
 					}).then(user => {
 						const modifiedUser = {
-							userId: user[0].user_id, // Assuming 'id' is the unique identifier in the database
+							userId: user[0].user_id,
 							name: user[0].name,
 							email: user[0].email,
 							entries: user[0].entries,
@@ -140,13 +140,12 @@ app.get("/profile/:userId", (req, res) => {
 
 app.put("/image", (req, res) => {
 	const {userId} = req.body;
-	console.log("Received userId:", userId);
 	database("users")
 		.where("user_id", userId)
 		.increment("entries", 1)
 		.returning("entries")
 		.then(entries => {
-			res.json({entries: entries[0].entries}); // Return a JSON object
+			res.json({entries: entries[0].entries});
 		}).catch(err => {
 		res.status(400).json("unable to update entries");
 	});
